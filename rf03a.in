@@ -1,0 +1,19 @@
+&parameters
+
+        nstep = 30
+        nvy = 1000
+        nvz = 2000
+        lvy = 4.0
+        lvz = 8.0
+        omn = 0.0
+        omt = 3.0
+        a_r = 3.0
+        theta = 1.0
+        vi  = 2.5
+        ky = 1.0
+        kz = 0.1666
+        om1_re = 0.3
+        om1_im = -0.1
+	om2_re = 0.3
+	om2_im = 0.1
+/
