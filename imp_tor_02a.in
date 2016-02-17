@@ -1,0 +1,48 @@
+&parameters
+
+        nstep = 10
+
+	nkz = 30
+	dkz = 0.05
+	kz_start = 0.0
+
+	nky = 1
+	dky = 0.5
+	ky_start = 0.0
+
+	nfprime = 1
+	dfprime = 0.0
+	fprime_start = 0.0
+
+	ntprime = 1
+	dtprime = 15.0
+	tprime_start = 0.0
+
+	nomd = 1
+	domd = 1.0
+	omd_start = 0.0
+
+	vy_1 = 1E-10
+        vy_2 = 5.0
+        vz_1 = -6.0
+	vz_2 = 6.0
+
+        om1_re = 0.9
+        om1_im = 0.4
+	om2_re = 1.0
+	om2_im = 0.3
+
+        vi  = 0.0
+        A = 3.0
+	tol = 1.0E-04
+	fr = 0.666
+
+	theta = 1.0
+	Zeff = 1.0
+	Z = 5
+	mu_e = 2.72D-04
+	mu_z = 5
+	na_e = 0.0
+	na_z = 0.0
+	na_i = 1.0
+/
