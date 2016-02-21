@@ -332,10 +332,10 @@ subroutine sa_integral(omega,integral,s)
                 rho = sqrt(theta*mu_e)*sqrt(ky**2+kx**2)*vy
                 call bjndd (n, rho, bj, dj, fj)
         else if (s==3) then
-                omega_star_n = theta/Z*fprime*ky
-                omega_star_t = theta/Z*0.5*(-3.0+vy**2+&
+                omega_star_n = 1.0/Z*fprime*ky
+                omega_star_t = 1.0/Z*0.5*(-3.0+vy**2+&
                         (vz**2-zi*2.0*vz*vi-vi**2))*tprime*ky
-                omega_star_d = theta/Z*((1.0-omd_kx)*(0.5*vy**2+&
+                omega_star_d = 1.0/Z*((1.0-omd_kx)*(0.5*vy**2+&
                         vz**2-zi*2.0*vz*vi-vi**2)*omd*ky/A+&
                         omd_kx*(0.5*vy**2+vz**2-zi*2.0*vz*vi-vi**2)*&
                         omd*kx/A)
