@@ -10,6 +10,7 @@ program imp_tor_itg
         integer (kind=8) :: nkz, nky, nkx
         real (kind=8) :: dkz, dky, dkx
         integer (kind=8) :: ikz, iky, ikx
+        integer (kind=8), dimension(:), allocatable :: ikx_maxgamma,ikx_maxchi
         real (kind=8) :: ky_start, kz_start, kx_start
 
         integer (kind=8) :: nfprime, ntprime, nomd
@@ -24,11 +25,12 @@ program imp_tor_itg
         real (kind=8) :: vi, tol, fr, na_e, na_z, na_i, omd_kx
         real (kind=8) :: theta, Zeff, Z, mu_e, mu_z
         integer (kind=8) :: nstep, steps
-        integer :: out_unit=101
+        integer :: gamma_unit=101, chi_unit=102, out_unit=103
 
         real (kind=8), dimension(:), allocatable :: ky_grid, kz_grid, kx_grid
         real (kind=8), dimension(:), allocatable :: fprime_grid, tprime_grid
-        real (kind=8), dimension(:), allocatable :: omd_grid
+        real (kind=8), dimension(:), allocatable :: omd_grid, chi_kx_scan
+        complex (kind=8), dimension(:), allocatable :: omega_kx_scan
 
         complex (kind=8) :: root, root_kz
         complex (kind=8) :: seed1, seed2
@@ -38,6 +40,12 @@ program imp_tor_itg
         call read_input_file
         call init_grids
 
+        call open_output_file(gamma_unit,'.datgam')
+        write (gamma_unit,'(8a12)') "tprime","fprime","omd","kx",&
+                                "ky","kz","omega","gamma"
+        call open_output_file(chi_unit,'.datchi')
+        write (chi_unit,'(9a12)') "tprime","fprime","omd","kx",&
+                                "ky","kz","omega","gamma","chi"
         call open_output_file(out_unit,'.dat')
         write (out_unit,'(8a12)') "tprime","fprime","omd","kx",&
                                 "ky","kz","omega","gamma"
@@ -49,9 +57,10 @@ program imp_tor_itg
                  tprime = tprime_grid(itprime)
                  print*, "tprime, fprime, omd"
                  print*, tprime, fprime, omd
-                 do ikx = 1, nkx
-                    do iky = 1, nky
-                       do ikz = 1, nkz
+                 do iky = 1, nky
+                    do ikz = 1, nkz
+                       omega_kx_scan = 0.0
+                       do ikx = 1, nkx
                           ky = ky_grid(iky)
                           kz = kz_grid(ikz)
                           kx = kx_grid(ikx)
@@ -64,25 +73,31 @@ program imp_tor_itg
                             call rootfinder(seed1,seed2,root,steps)
                             if (steps==nstep) then
                                 print*, 'No root is found.'
+                                root = 0.0
+                                exit
                             else 
                                 print*, "Root is found:"
                                 print*, root    
                                 write (out_unit, '(8e12.4)') tprime,fprime,&
                                                         omd,kx,ky,kz,root
+                                omega_kx_scan(ikx) = root
                             end if
                             root_kz = root
                           else if (ifprime==1 .and. itprime==1 .and. iomd==1&
-                                .and. ikz==1) then
+                                .and. ikx==1) then
                             seed1 = root_kz
                             seed2 = root_kz*0.9
                             call rootfinder(seed1,seed2,root,steps)
                             if (steps==nstep) then
                                 print*, 'No root is found.'
+                                root = 0.0
+                                exit
                             else 
                                 print*, "Root is found:"
                                 print*, root    
                                 write (out_unit, '(8e12.4)') tprime,fprime,&
                                                         omd,kx,ky,kz,root
+                                omega_kx_scan(ikx) = root
                             end if
                             root_kz = root
                           else
@@ -91,19 +106,34 @@ program imp_tor_itg
                             call rootfinder(seed1,seed2,root,steps)
                             if (steps==nstep) then
                                 print*, 'No root is found.'
+                                root = 0.0
+                                exit
                             else 
                                 print*, "Root is found:"
                                 print*, root    
                                 write (out_unit, '(8e12.4)') tprime,fprime,&
                                                         omd,kx,ky,kz,root
+                                omega_kx_scan(ikx) = root
                             end if
                           end if
                        end do
+                    ikx_maxgamma = maxloc(aimag(omega_kx_scan))
+                    if (.not.maxval(aimag(omega_kx_scan))==0) write (gamma_unit,&
+                        '(8e12.4)') tprime,fprime,omd, &
+                       kx_grid(ikx_maxgamma),ky,kz,omega_kx_scan(ikx_maxgamma)
+                    chi_kx_scan = aimag(omega_kx_scan)/(kx_grid**2+ky**2)
+                    ikx_maxchi = maxloc(chi_kx_scan)
+                    if (.not.maxval(chi_kx_scan)==0) write (chi_unit, &
+                       '(9e12.4)') tprime,fprime,omd, &
+                       kx_grid(ikx_maxchi),ky,kz,omega_kx_scan(ikx_maxchi),&
+                       chi_kx_scan(ikx_maxchi)
                     end do
                  end do
               end do
            end do
         end do
+        call close_output_file (gamma_unit)
+        call close_output_file (chi_unit)
         call close_output_file (out_unit)
         call finish_file_utils
 
@@ -425,6 +455,10 @@ subroutine init_grids
         do iomd = 1, nomd
                 omd_grid(iomd) = iomd*domd+omd_start
         end do
+
+        allocate(omega_kx_scan(nkx),chi_kx_scan(nkx),ikx_maxgamma(1),ikx_maxchi(1))
+        omega_kx_scan = 0.0
+        chi_kx_scan = 0.0
 
 end subroutine
 
